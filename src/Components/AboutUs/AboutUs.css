@@ -1,0 +1,31 @@
+
+.address-table {
+    width: 80%;
+    justify-content: center;
+    align-items: center;
+    border-collapse: collapse;
+    margin-top: 50px;
+    margin-left: 150px;
+  }
+
+  
+  .address-table th, .address-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .address-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .address-table tbody tr:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
