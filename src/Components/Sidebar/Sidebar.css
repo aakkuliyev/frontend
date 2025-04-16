@@ -1,0 +1,98 @@
+/* Sidebar.css */
+.sidebar-container {
+    width: 250px;
+    background-color: #f8f9fa;
+    min-height: 100vh;       /* чтобы тянулось на полный экран по высоте */
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif; /* при желании замените на нужный шрифт */
+}
+
+/* Верхняя часть с названием и email */
+.sidebar-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* выравниваем по левому краю */
+    padding: 1rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.sidebar-logo h2 {
+    margin: 0 0 0.3rem 0;
+    font-size: 1.2rem;
+    color: #333;
+    font-weight: bold;
+}
+
+/* Email не переносится, а при нехватке места появляется горизонтальная прокрутка */
+.sidebar-email {
+    font-size: 0.95rem;
+    color: #666;
+    white-space: nowrap; /* чтобы не переносился на несколько строк */
+    overflow-x: auto;    /* горизонтальная прокрутка при очень длинном email */
+    max-width: 100%;     /* чтобы не вылезал за блок */
+}
+
+/* Меню */
+.sidebar-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu li {
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.sidebar-menu li a:hover {
+    background-color: #e2e6ea;
+}
+
+.active-link {
+    background-color: #e2e6ea;
+    font-weight: 500;
+}
+
+/* Иконки и текст в пунктах меню */
+.sidebar-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+}
+
+.sidebar-text {
+    font-size: 1rem;
+}
+
+/* Блок логаута (внизу списка, но без прилипания к низу экрана) */
+.sidebar-logout {
+    border-top: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+}
+
+.sidebar-logout a {
+    display: flex;
+    align-items: center;
+    color: #dc3545;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.sidebar-logout a:hover {
+    background-color: #f8d7da;
+}
+
+.sidebar-logout .sidebar-icon {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+}

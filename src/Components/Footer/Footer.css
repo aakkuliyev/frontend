@@ -1,63 +1,42 @@
-.footer{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 50px;
+.footer {
+    background-color: #f1f3f6;
+    padding: 30px 40px;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #444;
+    border-top: 1px solid #ddd;
 }
 
-.footer-logo{
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-
-.footer-logo p{
-    color: #383838;
-    font-size: 46px;
-    font-weight: 700;
-}
-
-.footer-links{
-    display: flex;
-    list-style: none;
-    gap: 50px;
-    color: #252525;
-    font-size: 20px;
-}
-
-.footer-links li{
-    cursor: pointer;
-}
-
-.footer-social-icon{
-    display: flex;
-    gap: 20px;
-}
-
-.footer-icons-container{
-    padding: 10px;
-    padding-bottom: 6px;
-    background: #fbfbfb;
-    border: 1px solid #ebebeb;
-}
-
-.footer-copyright{
+.footer-logo {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 30px;
     width: 100%;
-    margin-bottom: 30px;
-    color: #1a1a1a;
-    font-size: 20px;
+    margin-bottom: 15px;
 }
 
-.footer-copyright hr{
-    width: 80%;
+.footer-logo img {
+    height: 60px;
+    margin-bottom: 8px;
+}
+
+.footer-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.footer-bottom {
+    margin-top: 20px;
+}
+
+.footer-bottom hr {
     border: none;
-    border-radius: 10px;
-    height: 3px;
-    background: #c7c7c7;
+    height: 1px;
+    background-color: #ccc;
+    margin-bottom: 10px;
+}
+
+.footer-bottom p {
+    font-size: 13px;
+    color: #777;
 }

@@ -1,0 +1,45 @@
+/* src/Components/QuickActions/QuickActions.css */
+.quick-actions {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 1rem;
+}
+
+.quick-actions h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.actions-grid {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.action-item {
+    flex: 1;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    text-align: center;
+    padding: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.action-icon {
+    font-size: 2rem;
+    color: #007bff; /* при желании меняйте цвет */
+    margin-bottom: 0.5rem;
+}
+
+.action-label {
+    font-size: 1rem;
+    color: #333;
+}

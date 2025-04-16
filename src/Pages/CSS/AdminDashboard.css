@@ -1,0 +1,44 @@
+/* AdminDashboard.css */
+.admin-dashboard {
+    padding: 2rem;
+    background-color: #f5f6fa;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Заголовок */
+.admin-dashboard h2 {
+    margin-top: 0;
+    font-size: 2rem;
+    color: #333;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* Карточки со статистикой */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Блок графиков */
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Новости */
+.news-page-container {
+    margin-bottom: 2rem;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .charts-container {
+        grid-template-columns: 1fr;
+    }
+}

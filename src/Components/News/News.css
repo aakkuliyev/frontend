@@ -1,0 +1,54 @@
+/* NewsPage.css */
+
+/* 1) Импортируем шрифт Open Sans с поддержкой кириллицы.
+   Если проект офлайн и недоступен Google Fonts,
+   можно скачать шрифт локально и @font-face подключить.
+*/
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap&subset=cyrillic");
+
+/* 2) Ставим кодировку CSS */
+@charset "UTF-8";
+
+/* Сбрасываем отступы у html, body */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* чтобы можно было растянуть на всю высоту экрана */
+}
+
+/* Устанавливаем базовый шрифт для всего документа */
+:root {
+    font-family: "Open Sans", sans-serif;
+}
+
+/* Контейнер всего контента новостей.
+   Делаем его на всю доступную высоту (min-height: 100vh)
+   и ширину (width: 100%).
+*/
+.news-page-container {
+    width: 100%;
+    min-height: 100vh; /* растягивается по высоте экрана */
+    box-sizing: border-box;
+    background-color: #fafafa;
+    padding: 20px;
+}
+
+/* Заголовок (например, h2) на странице новостей */
+.news-page-container h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Стиль абзацев/описаний.
+   Поддерживает латиницу и кириллицу
+   (т.к. используем Open Sans).
+*/
+.news-page-container p {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+    margin: 0 0 1rem;
+}

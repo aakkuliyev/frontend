@@ -1,0 +1,30 @@
+/* src/Components/StatsCard/StatsCard.css */
+.stats-card {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    padding: 0.8rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card-title {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.stats-card-value {
+    margin: 0.3rem 0 0;
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #222;
+}

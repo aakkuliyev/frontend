@@ -1,0 +1,50 @@
+/* src/Components/RecentActivity/RecentActivity.css */
+.recent-activity {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.recent-activity h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: #333;
+}
+
+.recent-activity ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.activity-item {
+    border-bottom: 1px solid #eee;
+    padding: 0.5rem 0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-action {
+    font-size: 1rem;
+    color: #555;
+}
+
+.activity-meta {
+    font-size: 0.9rem;
+    color: #999;
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.3rem;
+}
+
+.activity-user {
+    /* здесь можно что-то вроде цветового выделения пользователя */
+}
+
+.activity-date {
+    /* можно стилизовать дату */
+}
