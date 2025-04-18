@@ -63,12 +63,6 @@ function Sidebar() {
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink to="/admin/users" className={({ isActive }) => (isActive ? "active-link" : "")}>
-                        <FaUsers className="sidebar-icon" />
-                        <span className="sidebar-text">Users</span>
-                    </NavLink>
-                </li>
-                <li>
                     <NavLink to="/admin/teachers" className={({ isActive }) => (isActive ? "active-link" : "")}>
                         <FaChalkboardTeacher className="sidebar-icon" />
                         <span className="sidebar-text">Teachers</span>

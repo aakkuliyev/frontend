@@ -1,0 +1,119 @@
+.personal-info-wrapper {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+    max-width: 960px;
+    margin: 40px auto;
+}
+
+.personal-info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 14px;
+    gap: 10px;
+    transition: border 0.2s ease;
+}
+
+.input-group input,
+.datepicker-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    outline: none;
+    color: #111827;
+}
+
+.input-group input::placeholder,
+.datepicker-input::placeholder {
+    color: #9ca3af;
+}
+
+.input-group:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.switch-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.switch-group label {
+    font-weight: 600;
+    color: #374151;
+}
+
+.switch-on,
+.switch-off {
+    width: 44px;
+    height: 24px;
+    background-color: #d1d5db;
+    border-radius: 9999px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.switch-on {
+    background-color: #2563eb;
+}
+
+.slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: white;
+    transition: transform 0.2s ease;
+}
+
+.switch-on .slider {
+    transform: translateX(20px);
+}
+
+.save-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: #2563eb;
+    color: white;
+    padding: 12px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    gap: 0.5rem;
+    margin-top: 8px;
+}
+
+.save-button:hover {
+    background-color: #1d4ed8;
+}
+
+.save-msg {
+    color: #10b981;
+    font-weight: 500;
+    margin-top: 8px;
+}

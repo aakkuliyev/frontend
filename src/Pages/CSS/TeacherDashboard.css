@@ -1,0 +1,66 @@
+/* src/CSS/TeacherDashboard.css */
+
+.teacher-dashboard {
+    padding: 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.dashboard-title {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    color: #2c3e50;
+}
+
+.teacher-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.teacher-actions button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #0d6efd;
+    color: #fff;
+    border: none;
+    padding: 0.75rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.teacher-actions button:hover {
+    background-color: #0b5ed7;
+}
+
+.dashboard-section {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-align: left;
+}
+
+.dashboard-section h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .teacher-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .teacher-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}

@@ -1,0 +1,71 @@
+.education-tab {
+    padding: 16px 0;
+}
+
+.add-button {
+    background-color: #2563eb;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    cursor: pointer;
+}
+
+.education-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.education-card {
+    background: #f9fafb;
+    padding: 12px 16px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.edu-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 8px;
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-content input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 8px;
+}

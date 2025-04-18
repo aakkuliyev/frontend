@@ -14,11 +14,11 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 function CoursesPieChart() {
     // Пример данных по распределению курсов
     const data = {
-        labels: ["Math", "Computer Science", "Electronics", "Physics"],
+        labels: ["SQL", "Computer Science", "Programming in Java", "CISCO"],
         datasets: [
             {
                 label: "Courses Distribution",
-                data: [10, 25, 15, 8], // количество курсов
+                data: [3, 1, 4, 6], // количество курсов
                 backgroundColor: [
                     "rgba(255, 99, 132, 0.6)",
                     "rgba(54, 162, 235, 0.6)",
@@ -45,7 +45,7 @@ function CoursesPieChart() {
             },
             title: {
                 display: true,
-                text: "Distribution of Courses"
+                text: "Credits of Courses"
             }
         }
     };

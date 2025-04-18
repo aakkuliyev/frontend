@@ -30,7 +30,7 @@ function UsersGrowthChart() {
         datasets: [
             {
                 label: "Users",
-                data: [50, 100, 180, 220, 300, 400], // Количество пользователей
+                data: [3, 10, 18, 20, 10, 11], // Количество пользователей
                 borderColor: "rgba(75,192,192,1)",
                 backgroundColor: "rgba(75,192,192,0.2)",
                 fill: true,

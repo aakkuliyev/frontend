@@ -17,8 +17,8 @@ function AdminDashboard() {
             <div className="stats-container">
                 <StatsCard title="Total Teachers" value="45" />
                 <StatsCard title="Total Students" value="230" />
-                <StatsCard title="Active Users Today" value="57" />
-                <StatsCard title="Active Courses" value="8" />
+                <StatsCard title="Active Users Today" value="7" />
+                <StatsCard title="Active Courses" value="6" />
             </div>
 
             {/* Графики/Диаграммы */}

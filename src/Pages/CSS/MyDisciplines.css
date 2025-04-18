@@ -1,0 +1,95 @@
+.my-disciplines-page {
+    padding: 24px;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f9fafb;
+    min-height: 80vh;
+}
+
+.discipline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.discipline-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.search-input {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 8px 12px;
+    gap: 8px;
+}
+
+.search-input input {
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.discipline-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.discipline-card {
+    display: flex;
+    background-color: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    align-items: flex-start;
+    gap: 12px;
+    transition: box-shadow 0.2s;
+}
+
+.discipline-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.discipline-icon {
+    font-size: 24px;
+    margin-top: 6px;
+    color: #2563eb;
+}
+
+.discipline-info {
+    flex: 1;
+}
+
+.discipline-info strong {
+    font-size: 16px;
+    color: #1f2937;
+}
+
+.discipline-info p {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 4px 0;
+}
+
+.discipline-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    color: #4b5563;
+    margin-top: 6px;
+}
+
+.discipline-meta svg {
+    margin-right: 4px;
+}
+
+.no-results {
+    color: #9ca3af;
+    text-align: center;
+    font-style: italic;
+}
