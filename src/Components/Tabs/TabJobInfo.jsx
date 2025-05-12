@@ -2,48 +2,41 @@ import React, { useEffect, useState } from "react";
 import "./TabAcademic.css";
 
 const TabJobInfo = ({ teacherId }) => {
-    const [list, setList] = useState([]);
+    const [jobs, setJobs] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editItem, setEditItem] = useState(null);
+    const [editJob, setEditJob] = useState(null);
 
-    const fetchData = () => {
-        fetch(`/api/v1/teachers/${teacherId}/jobs`)
-            .then(res => res.json())
-            .then(setList);
+    const fetchWithToken = (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            },
+        });
     };
 
-    /*useEffect(() => {
-        fetchData();
-    }, []);*/
+    const fetchData = async () => {
+        if (!teacherId) return;
+        try {
+            const res = await fetchWithToken(`/api/v1/teachers/${teacherId}/jobinfo`);
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            const data = await res.json();
+            setJobs(data);
+        } catch (error) {
+            console.error("Fetch jobs error:", error);
+        }
+    };
 
     useEffect(() => {
-        const mockJobs = [
-            {
-                jobId: 1,
-                teacherId,
-                organizationName: "IITU",
-                organizationAddress: "Manas Street 34a",
-                position: "Lecturer",
-                workExperience: 5,
-                mainWorkFlag: true
-            },
-            {
-                jobId: 2,
-                teacherId,
-                organizationName: "KazNU",
-                organizationAddress: "Al-Farabi Ave",
-                position: "Senior Lecturer",
-                workExperience: 2,
-                mainWorkFlag: false
-            }
-        ];
-        setList(mockJobs);
-    }, []);
+        fetchData();
+    }, [teacherId]);
 
-
-    const openModal = (item = null) => {
-        setEditItem(
-            item || {
+    const openModal = (job = null) => {
+        setEditJob(
+            job || {
                 teacherId,
                 organizationName: "",
                 organizationAddress: "",
@@ -55,40 +48,48 @@ const TabJobInfo = ({ teacherId }) => {
         setShowModal(true);
     };
 
-    const save = () => {
-        const method = editItem.jobId ? "PUT" : "POST";
-        const url = editItem.jobId
-            ? `/api/v1/teachers/${teacherId}/jobs/${editItem.jobId}`
-            : `/api/v1/teachers/${teacherId}/jobs`;
+    const saveJob = async () => {
+        const method = editJob.jobId ? "PUT" : "POST";
+        const url = editJob.jobId
+            ? `/api/v1/teachers/${teacherId}/jobinfo/${editJob.jobId}`
+            : `/api/v1/teachers/${teacherId}/jobinfo`;
 
-        fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editItem)
-        }).then(() => {
+        try {
+            const res = await fetchWithToken(url, { method, body: JSON.stringify(editJob) });
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
             setShowModal(false);
             fetchData();
-        });
+        } catch (error) {
+            console.error("Save job error:", error);
+        }
     };
 
-    const remove = (id) => {
-        fetch(`/api/v1/teachers/${teacherId}/jobs/${id}`, { method: "DELETE" }).then(fetchData);
+    const deleteJob = async (jobId) => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/jobinfo/${jobId}`,
+                { method: "DELETE" }
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            fetchData();
+        } catch (error) {
+            console.error("Delete job error:", error);
+        }
     };
 
     return (
         <div className="academic-tab">
             <button className="add-button" onClick={() => openModal()}>+ Add Job</button>
-
             <div className="academic-list">
-                {list.map((job) => (
+                {jobs.map((job) => (
                     <div key={job.jobId} className="academic-card">
                         <div>
                             <strong>{job.organizationName}</strong><br />
-                            {job.position} — {job.workExperience} yrs {job.mainWorkFlag ? "(Main)" : ""}
+                            {job.position} — {job.workExperience} yrs {job.mainWorkFlag && "(Main)"}
                         </div>
                         <div className="actions">
                             <button onClick={() => openModal(job)}>✏️</button>
-                            <button onClick={() => remove(job.jobId)}>🗑️</button>
+                            <button onClick={() => deleteJob(job.jobId)}>🗑️</button>
                         </div>
                     </div>
                 ))}
@@ -97,19 +98,49 @@ const TabJobInfo = ({ teacherId }) => {
             {showModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
-                        <h3>{editItem.jobId ? "Edit Job" : "Add Job"}</h3>
+                        <h3>{editJob.jobId ? "Edit Job" : "Add Job"}</h3>
 
-                        <input placeholder="Organization Name" value={editItem.organizationName} onChange={(e) => setEditItem({ ...editItem, organizationName: e.target.value })} />
-                        <input placeholder="Address" value={editItem.organizationAddress} onChange={(e) => setEditItem({ ...editItem, organizationAddress: e.target.value })} />
-                        <input placeholder="Position" value={editItem.position} onChange={(e) => setEditItem({ ...editItem, position: e.target.value })} />
-                        <input type="number" placeholder="Experience (years)" value={editItem.workExperience} onChange={(e) => setEditItem({ ...editItem, workExperience: parseInt(e.target.value) })} />
-                        <label>
-                            <input type="checkbox" checked={editItem.mainWorkFlag} onChange={(e) => setEditItem({ ...editItem, mainWorkFlag: e.target.checked })} />
-                            Main Work Place
-                        </label>
+                        <div className="form-group">
+                            <input
+                                placeholder="Organization Name"
+                                value={editJob.organizationName}
+                                onChange={(e) => setEditJob({ ...editJob, organizationName: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                placeholder="Address"
+                                value={editJob.organizationAddress}
+                                onChange={(e) => setEditJob({ ...editJob, organizationAddress: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                placeholder="Position"
+                                value={editJob.position}
+                                onChange={(e) => setEditJob({ ...editJob, position: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="number"
+                                placeholder="Experience (years)"
+                                value={editJob.workExperience}
+                                onChange={(e) => setEditJob({ ...editJob, workExperience: parseInt(e.target.value, 10) || 0 })}
+                            />
+                        </div>
+                        <div className="form-group checkbox-field">
+                            <input
+                                id="mainWork"
+                                type="checkbox"
+                                checked={editJob.mainWorkFlag}
+                                onChange={(e) => setEditJob({ ...editJob, mainWorkFlag: e.target.checked })}
+                            />
+                            <label htmlFor="mainWork" className="checkbox-label">Main Work Place</label>
+                        </div>
 
                         <div className="modal-actions">
-                            <button onClick={save}>Save</button>
+                            <button onClick={saveJob}>Save</button>
                             <button onClick={() => setShowModal(false)}>Cancel</button>
                         </div>
                     </div>

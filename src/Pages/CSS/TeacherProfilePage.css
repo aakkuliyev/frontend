@@ -2,65 +2,102 @@
 
 .teacher-profile-page {
     max-width: 1200px;
-    margin: 40px auto;
-    padding: 32px;
-    background-color: #f9fbfc;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fcfdfe;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     font-family: 'Segoe UI', sans-serif;
 }
 
 .profile-header {
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 24px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.back-button {
+    font-size: 1rem;
+    color: #2563eb;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.back-button:hover {
+    background: #eaf2ff;
 }
 
 .profile-header h2 {
-    font-size: 28px;
+    margin: 0;
+    font-size: 2rem;
     font-weight: 600;
     color: #111827;
 }
 
 .profile-header p {
+    margin: 0;
+    font-size: 1rem;
     color: #6b7280;
-    font-size: 16px;
 }
 
 .tab-horizontal {
     display: flex;
-    gap: 12px;
+    gap: 1rem;
     border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 24px;
-    padding-bottom: 8px;
+    margin-bottom: 1.5rem;
 }
 
 .tab-horizontal button {
-    background: none;
+    background: transparent;
     border: none;
-    padding: 10px 16px;
-    font-size: 15px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #374151;
     cursor: pointer;
+    position: relative;
     border-radius: 6px 6px 0 0;
-    transition: all 0.2s ease;
+    transition: background 0.2s;
 }
 
 .tab-horizontal button:hover {
-    background-color: #f3f4f6;
+    background: #f3f4f6;
 }
 
 .tab-horizontal button.active {
     color: #2563eb;
-    border-bottom: 2px solid #2563eb;
-    background-color: #ffffff;
+    background: #ffffff;
+}
+
+.tab-horizontal button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #2563eb;
+    border-radius: 2px;
 }
 
 .tab-content {
-    padding: 24px;
-    background-color: #ffffff;
+    padding: 1.5rem;
+    background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .tab-horizontal {
+        flex-wrap: wrap;
+    }
+    .tab-horizontal button {
+        flex: 1;
+        text-align: center;
+    }
 }

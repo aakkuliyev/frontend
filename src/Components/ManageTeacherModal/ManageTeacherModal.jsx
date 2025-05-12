@@ -1,110 +1,113 @@
-// src/Components/ManageTeachersModal.jsx
-import React, { useEffect, useState } from "react";
-import "./ManageTeacherModal.css";
+// src/Components/ManageTeacherModal/ManageTeacherModal.jsx
+import React, { useEffect, useState } from 'react';
+import './ManageTeacherModal.css';
+
+// простой fetch-helper, без хуков
+function fetchWithToken(url, options = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    }).then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        return res.status === 204 ? null : res.json();
+    });
+}
 
 function ManageTeachersModal({ discipline, onClose }) {
     const [teachers, setTeachers] = useState([]);
-    const [assigned, setAssigned] = useState({});
-    const [search, setSearch] = useState("");
+    const [assigned, setAssigned] = useState(new Set());
+    const [search, setSearch]     = useState('');
 
-    // Загружаем всех преподавателей
+    // загрузить всех преподавателей
     useEffect(() => {
-        fetch("/api/v1/teachers")
-            .then((res) => res.json())
-            .then((data) => setTeachers(data))
-            .catch(() => setTeachers([]));
+        fetchWithToken('/api/v1/teachers')
+            .then(setTeachers)
+            .catch(console.error);
     }, []);
 
-    // Загружаем уже назначенных преподавателей
+    // загрузить назначенных на текущую дисциплину
     useEffect(() => {
-        fetch(`/api/v1/teachers/1/disciplines`) // заменишь на getAll и фильтрацию
-            .then((res) => res.json())
-            .then((data) => {
-                const ids = new Set(
-                    data.filter((d) => d.disciplineId === discipline.id).map((d) => d.teacherId)
-                );
-                setAssigned((prev) => {
-                    const map = {};
-                    teachers.forEach((t) => {
-                        map[t.teacherId] = ids.has(t.teacherId);
-                    });
-                    return map;
-                });
-            });
-    }, [discipline, teachers]);
+        fetchWithToken(`/api/v1/disciplines/${discipline.disciplineId}/teachers`)
+            .then((list) =>
+                setAssigned(new Set(list.map((t) => t.teacherId)))
+            )
+            .catch(() => setAssigned(new Set()));
+    }, [discipline]);
 
-    const handleToggle = (id) => {
-        setAssigned((prev) => ({ ...prev, [id]: !prev[id] }));
+    const toggle = (id) => {
+        setAssigned((prev) => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
     };
 
-    const handleSave = async () => {
-        const promises = [];
-
-        Object.entries(assigned).forEach(([teacherId, isChecked]) => {
-            const url = `/api/v1/teachers/${teacherId}/disciplines/${discipline.id}`;
-            if (isChecked) {
-                promises.push(
-                    fetch(`/api/v1/teachers/${teacherId}/disciplines`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            disciplineId: discipline.id,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        })
-                    })
-                );
-            } else {
-                promises.push(fetch(url, { method: "DELETE" }));
-            }
+    const save = () => {
+        const requests = teachers.map((t) => {
+            const base = `/api/v1/teachers/${t.teacherId}/disciplines`;
+            return assigned.has(t.teacherId)
+                ? fetchWithToken(base, {
+                    method: 'POST',
+                    body: JSON.stringify({ disciplineId: discipline.disciplineId }),
+                })
+                : fetchWithToken(`${base}/${discipline.disciplineId}`, {
+                    method: 'DELETE',
+                });
         });
 
-        await Promise.all(promises);
-        onClose();
+        Promise.all(requests)
+            .then(onClose)
+            .catch((e) => alert(e.message));
     };
 
     const filtered = teachers.filter((t) =>
-        `${t.user.firstName} ${t.user.lastName}`.toLowerCase().includes(search.toLowerCase())
+        `${t.user.firstName} ${t.user.lastName}`
+            .toLowerCase()
+            .includes(search.toLowerCase())
     );
 
     return (
         <div className="modal-overlay">
             <div className="modal-content modal-wide">
                 <div className="modal-header">
-                    <h3>Manage Teachers – {discipline.name}</h3>
+                    <h3>Manage – {discipline.disciplineName}</h3>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
                 <input
-                    type="text"
                     className="search-input"
-                    placeholder="Search teachers..."
+                    placeholder="Search…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
 
                 <div className="teacher-list">
-                    {filtered.map((teacher) => (
-                        <div key={teacher.teacherId} className="teacher-item">
+                    {filtered.map((t) => (
+                        <div key={t.teacherId} className="teacher-item">
                             <div className="teacher-info">
-                                <img src="https://i.pravatar.cc/40" alt="avatar" />
+                                <span className="avatar">{t.user.firstName[0]}</span>
                                 <div>
-                                    <strong>{teacher.user.firstName} {teacher.user.lastName}</strong>
-                                    <p>{teacher.user.email}</p>
+                                    <strong>{t.user.firstName} {t.user.lastName}</strong>
+                                    <p>{t.user.email}</p>
                                 </div>
                             </div>
                             <input
                                 type="checkbox"
-                                checked={assigned[teacher.teacherId] || false}
-                                onChange={() => handleToggle(teacher.teacherId)}
+                                checked={assigned.has(t.teacherId)}
+                                onChange={() => toggle(t.teacherId)}
                             />
                         </div>
                     ))}
                 </div>
 
                 <div className="modal-buttons">
-                    <button className="cancel-btn" onClick={onClose}>Cancel</button>
-                    <button className="save-btn" onClick={handleSave}>Save Changes</button>
+                    <button onClick={onClose}>Cancel</button>
+                    <button onClick={save}>Save</button>
                 </div>
             </div>
         </div>

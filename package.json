@@ -8,9 +8,11 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "chart.js": "^3.9.1",
+    "axios": "^1.9.0",
+    "chart.js": "^4.4.9",
     "lucide-react": "^0.488.0",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-chartjs-2": "^5.3.0",
     "react-datepicker": "^8.3.0",
     "react-dom": "^18.2.0",
@@ -21,6 +23,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
+    "file-saver": "^2.0.5",
     "jwt-decode": "^4.0.0"
   },
   "scripts": {
@@ -29,7 +32,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
-  "proxy": "http://localhost:8088",
+  "proxy": "http://localhost:8089",
   "eslintConfig": {
     "extends": [
       "react-app",

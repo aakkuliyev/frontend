@@ -2,80 +2,95 @@ import React, { useEffect, useState } from "react";
 import "./TabAcademic.css";
 
 const TabForeignCognition = ({ teacherId }) => {
-    const [list, setList] = useState([]);
+    const [docs, setDocs] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editItem, setEditItem] = useState(null);
+    const [editDoc, setEditDoc] = useState(null);
 
-    const fetchData = () => {
-        fetch(`/api/v1/teachers/${teacherId}/foreign-cognitions`)
-            .then(res => res.json())
-            .then(setList);
+    const fetchWithToken = (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            },
+        });
     };
 
-    /*useEffect(() => {
-        fetchData();
-    }, []);*/
+    const fetchData = async () => {
+        if (!teacherId) return;
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/foreign-cognitions`
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            const data = await res.json();
+            setDocs(data);
+        } catch (err) {
+            console.error("Fetch docs error:", err);
+        }
+    };
+
     useEffect(() => {
-        const mockList = [
-            {
-                recognitionId: 1,
+        fetchData();
+    }, [teacherId]);
+
+    const openModal = (doc = null) => {
+        setEditDoc(
+            doc || {
                 teacherId,
-                documentName: "Diploma Recognition Germany",
-                issueDate: "2022-04-10"
-            },
-            {
-                recognitionId: 2,
-                teacherId,
-                documentName: "USA Equivalency Report",
-                issueDate: "2021-12-05"
+                documentName: "",
+                issueDate: new Date().toISOString().slice(0, 10),
             }
-        ];
-        setList(mockList);
-    }, []);
-
-
-    const openModal = (item = null) => {
-        setEditItem(item || {
-            teacherId,
-            documentName: "",
-            issueDate: new Date().toISOString().slice(0, 10),
-        });
+        );
         setShowModal(true);
     };
 
-    const save = () => {
-        const method = editItem.recognitionId ? "PUT" : "POST";
-        const url = editItem.recognitionId
-            ? `/api/v1/teachers/${teacherId}/foreign-cognitions/${editItem.recognitionId}`
+    const saveDoc = async () => {
+        const method = editDoc.recognitionId ? "PUT" : "POST";
+        const url = editDoc.recognitionId
+            ? `/api/v1/teachers/${teacherId}/foreign-cognitions/${editDoc.recognitionId}`
             : `/api/v1/teachers/${teacherId}/foreign-cognitions`;
 
-        fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editItem)
-        }).then(() => {
+        try {
+            const res = await fetchWithToken(url, {
+                method,
+                body: JSON.stringify(editDoc),
+            });
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
             setShowModal(false);
             fetchData();
-        });
+        } catch (err) {
+            console.error("Save doc error:", err);
+        }
     };
 
-    const remove = (id) => {
-        fetch(`/api/v1/teachers/${teacherId}/foreign-cognitions/${id}`, { method: "DELETE" }).then(fetchData);
+    const deleteDoc = async (id) => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/foreign-cognitions/${id}`,
+                { method: "DELETE" }
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            fetchData();
+        } catch (err) {
+            console.error("Delete doc error:", err);
+        }
     };
 
     return (
         <div className="academic-tab">
             <button className="add-button" onClick={() => openModal()}>+ Add Document</button>
-
             <div className="academic-list">
-                {list.map((item) => (
-                    <div key={item.recognitionId} className="academic-card">
+                {docs.map((doc) => (
+                    <div key={doc.recognitionId} className="academic-card">
                         <div>
-                            <strong>{item.documentName}</strong> — {item.issueDate?.slice(0, 10)}
+                            <strong>{doc.documentName}</strong> — {doc.issueDate.slice(0, 10)}
                         </div>
                         <div className="actions">
-                            <button onClick={() => openModal(item)}>✏️</button>
-                            <button onClick={() => remove(item.recognitionId)}>🗑️</button>
+                            <button onClick={() => openModal(doc)}>✏️</button>
+                            <button onClick={() => deleteDoc(doc.recognitionId)}>🗑️</button>
                         </div>
                     </div>
                 ))}
@@ -84,19 +99,28 @@ const TabForeignCognition = ({ teacherId }) => {
             {showModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
-                        <h3>{editItem.recognitionId ? "Edit" : "Add"} Cognition</h3>
-                        <input
-                            placeholder="Document Name"
-                            value={editItem.documentName}
-                            onChange={(e) => setEditItem({ ...editItem, documentName: e.target.value })}
-                        />
-                        <input
-                            type="date"
-                            value={editItem.issueDate}
-                            onChange={(e) => setEditItem({ ...editItem, issueDate: e.target.value })}
-                        />
+                        <h3>{editDoc.recognitionId ? "Edit Document" : "Add Document"}</h3>
+
+                        <div className="form-group">
+                            <input
+                                placeholder="Document Name"
+                                value={editDoc.documentName}
+                                onChange={(e) =>
+                                    setEditDoc({ ...editDoc, documentName: e.target.value })
+                                }
+                            />
+                        </div>
+                        <div className="form-group">
+                            <input
+                                type="date"
+                                value={editDoc.issueDate}
+                                onChange={(e) =>
+                                    setEditDoc({ ...editDoc, issueDate: e.target.value })
+                                }
+                            />
+                        </div>
                         <div className="modal-actions">
-                            <button onClick={save}>Save</button>
+                            <button onClick={saveDoc}>Save</button>
                             <button onClick={() => setShowModal(false)}>Cancel</button>
                         </div>
                     </div>

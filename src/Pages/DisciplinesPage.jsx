@@ -1,58 +1,64 @@
-import React, { useEffect, useState } from "react";
-import "./CSS/DisciplinesPage.css";
-import ManageTeachersModal from "../Components/ManageTeacherModal/ManageTeacherModal";
-import AddDisciplineModal from "../Components/AddDisciplineModal/AddDisciplineModal";
+import React, { useEffect, useState } from 'react';
+import ManageTeachersModal from '../Components/ManageTeacherModal/ManageTeacherModal';
+import AddDisciplineModal from '../Components/AddDisciplineModal/AddDisciplineModal';
+import './CSS/DisciplinesPage.css';
 
-const mockDisciplines = [
-    { id: 1, name: "Mathematics", assignedCount: 8 },
-    { id: 2, name: "Computer Science", assignedCount: 5 },
-    { id: 3, name: "Physics", assignedCount: 3 },
-];
+// обычный helper, берёт токен и ставит заголовок
+function fetchWithToken(url, options = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(options.headers || {}),
+        },
+    });
+}
 
-function DisciplinesPage() {
+const DisciplinesPage = () => {
     const [disciplines, setDisciplines] = useState([]);
-    const [selectedDiscipline, setSelectedDiscipline] = useState(null);
-    const [showAddModal, setShowAddModal] = useState(false);
+    const [selected, setSelected]       = useState(null);
+    const [showAdd, setShowAdd]         = useState(false);
+
+    // загрузка списка дисциплин
+    const loadDisciplines = () => {
+        fetchWithToken('/api/v1/disciplines')
+            .then(res => {
+                if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+                return res.json();
+            })
+            .then(data => setDisciplines(data))
+            .catch(err => console.error('Failed to load disciplines:', err));
+    };
 
     useEffect(() => {
-        // fetch('/api/v1/disciplines')
-        //   .then(res => res.json())
-        //   .then(data => setDisciplines(data))
-        //   .catch(err => console.error("Failed to load disciplines:", err));
-        setDisciplines(mockDisciplines);
+        loadDisciplines();
     }, []);
 
-    const handleOpenManage = (discipline) => {
-        setSelectedDiscipline(discipline);
-    };
-
-    const handleCloseModal = () => {
-        setSelectedDiscipline(null);
-    };
-
-    const handleAddSuccess = (newDiscipline) => {
-        setDisciplines((prev) => [...prev, newDiscipline]);
+    // после успешного добавления
+    const handleAddSuccess = () => {
+        setShowAdd(false);
+        loadDisciplines();
     };
 
     return (
         <div className="disciplines-page">
             <div className="disciplines-header">
                 <h2>Discipline Management</h2>
-                <button className="add-btn" onClick={() => setShowAddModal(true)}>
+                <button className="add-btn" onClick={() => setShowAdd(true)}>
                     + Add Discipline
                 </button>
             </div>
 
             <div className="disciplines-list">
-                {disciplines.map((d) => (
-                    <div key={d.id} className="discipline-card">
+                {disciplines.map(d => (
+                    <div key={d.disciplineId} className="discipline-card">
                         <div className="discipline-info">
-                            <strong>{d.name}</strong>
-                            <span>{d.assignedCount} teachers assigned</span>
+                            <strong>{d.disciplineName}</strong>
                         </div>
                         <div className="discipline-actions">
-                            <button className="edit-btn">✎</button>
-                            <button className="manage-btn" onClick={() => handleOpenManage(d)}>
+                            <button onClick={() => setSelected(d)}>
                                 Manage Teachers
                             </button>
                         </div>
@@ -60,20 +66,25 @@ function DisciplinesPage() {
                 ))}
             </div>
 
-            {selectedDiscipline && (
+            {selected && (
                 <ManageTeachersModal
-                    discipline={selectedDiscipline}
-                    onClose={handleCloseModal}
+                    discipline={selected}
+                    onClose={() => {
+                        setSelected(null);
+                        loadDisciplines();
+                    }}
                 />
             )}
 
-            <AddDisciplineModal
-                isOpen={showAddModal}
-                onClose={() => setShowAddModal(false)}
-                onSuccess={handleAddSuccess}
-            />
+            {showAdd && (
+                <AddDisciplineModal
+                    isOpen={showAdd}
+                    onClose={() => setShowAdd(false)}
+                    onSuccess={handleAddSuccess}
+                />
+            )}
         </div>
     );
-}
+};
 
 export default DisciplinesPage;

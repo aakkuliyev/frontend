@@ -1,51 +1,103 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaSave, FaUser, FaEnvelope, FaMapMarkerAlt, FaIdCard, FaShieldAlt, FaRegCalendarAlt, FaTags } from "react-icons/fa";
+import {
+    FaSave,
+    FaUser,
+    FaEnvelope,
+    FaMapMarkerAlt,
+    FaIdCard,
+    FaTags,
+    FaShieldAlt,
+    FaRegCalendarAlt,
+} from "react-icons/fa";
 import { Switch } from "@headlessui/react";
 import "./TabPersonalInfo.css";
 
-const TabPersonalInfo = ({ teacher }) => {
-    const [formData, setFormData] = useState({
-        ...teacher,
-        dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth) : null,
-    });
+const TabPersonalInfo = ({ teacher, onUpdate }) => {
+    const [formData, setFormData] = useState({});
     const [saved, setSaved] = useState(false);
+
+    // initialize or update formData when teacher prop changes
+    useEffect(() => {
+        if (teacher) {
+            setFormData({
+                ...teacher,
+                user: {
+                    firstName: teacher.user?.firstName || "",
+                    lastName: teacher.user?.lastName || "",
+                    email: teacher.user?.email || "",
+                    role: teacher.user?.role || "",
+                },
+                dateOfBirth: teacher.dateOfBirth ? new Date(teacher.dateOfBirth) : null,
+            });
+        }
+    }, [teacher]);
+
+    const fetchWithToken = (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            },
+        });
+    };
+
+    const handleUserChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            user: { ...prev.user, [name]: value },
+        }));
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleUserChange = (e) => {
-        const { name, value } = e.target;
-        const user = { ...formData.user, [name]: value };
-        setFormData((prev) => ({ ...prev, user }));
-    };
+    const handleSubmit = async () => {
+        try {
+            const payload = {
+                ...formData,
+                dateOfBirth: formData.dateOfBirth
+                    ? formData.dateOfBirth.toISOString().slice(0, 10)
+                    : null,
+            };
+            const response = await fetchWithToken(
+                `/api/v1/teachers/${formData.teacherId}`,
+                { method: "PUT", body: JSON.stringify(payload) }
+            );
 
-    const handleSubmit = () => {
-        const payload = {
-            ...formData,
-            dateOfBirth: formData.dateOfBirth?.toISOString().slice(0, 10),
-        };
+            if (!response.ok) {
+                throw new Error(`Status ${response.status}`);
+            }
 
-        fetch(`/api/v1/teachers/${formData.teacherId}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        })
-            .then((res) => res.json())
-            .then(() => {
-                setSaved(true);
-                setTimeout(() => setSaved(false), 3000);
-            })
-            .catch(console.error);
+            let updated = null;
+            const text = await response.text();
+            if (text) {
+                updated = JSON.parse(text);
+            }
+
+            setSaved(true);
+            onUpdate?.(updated);
+            setTimeout(() => setSaved(false), 3000);
+        } catch (error) {
+            console.error("Error saving personal info:", error);
+        }
     };
 
     return (
         <div className="personal-info-wrapper">
-            <form className="personal-info-form" onSubmit={(e) => e.preventDefault()}>
+            <form
+                className="personal-info-form"
+                onSubmit={(e) => e.preventDefault()}
+            >
                 <div className="form-grid">
+                    {/* User fields */}
                     <div className="input-group">
                         <FaUser />
                         <input
@@ -55,7 +107,6 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleUserChange}
                         />
                     </div>
-
                     <div className="input-group">
                         <FaUser />
                         <input
@@ -65,7 +116,6 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleUserChange}
                         />
                     </div>
-
                     <div className="input-group">
                         <FaEnvelope />
                         <input
@@ -75,18 +125,32 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleUserChange}
                         />
                     </div>
-
+                    <div className="input-group">
+                        <FaShieldAlt />
+                        <select
+                            name="role"
+                            value={formData.user?.role || ""}
+                            onChange={handleUserChange}
+                        >
+                            <option value="">Select Role</option>
+                            <option value="ADMIN">Admin</option>
+                            <option value="TEACHER">Teacher</option>
+                            <option value="USER">User</option>
+                        </select>
+                    </div>
+                    {/* Personal fields */}
                     <div className="input-group">
                         <FaRegCalendarAlt />
                         <DatePicker
                             selected={formData.dateOfBirth}
-                            onChange={(date) => setFormData((prev) => ({ ...prev, dateOfBirth: date }))}
+                            onChange={(date) =>
+                                setFormData((prev) => ({ ...prev, dateOfBirth: date }))
+                            }
                             placeholderText="Date of Birth"
                             className="datepicker-input"
                             dateFormat="yyyy-MM-dd"
                         />
                     </div>
-
                     <div className="input-group">
                         <FaMapMarkerAlt />
                         <input
@@ -96,7 +160,6 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleChange}
                         />
                     </div>
-
                     <div className="input-group">
                         <FaIdCard />
                         <input
@@ -106,7 +169,6 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleChange}
                         />
                     </div>
-
                     <div className="input-group">
                         <FaTags />
                         <input
@@ -116,7 +178,6 @@ const TabPersonalInfo = ({ teacher }) => {
                             onChange={handleChange}
                         />
                     </div>
-
                     <div className="input-group">
                         <FaShieldAlt />
                         <input
@@ -127,12 +188,17 @@ const TabPersonalInfo = ({ teacher }) => {
                         />
                     </div>
 
+                    {/* Switch */}
                     <div className="switch-group">
-                        <label>Has Medical Book</label>
+                        <label htmlFor="hasMedicalBook">Has Medical Book</label>
                         <Switch
                             checked={formData.hasMedicalBook || false}
-                            onChange={(val) => setFormData((prev) => ({ ...prev, hasMedicalBook: val }))}
-                            className={`${formData.hasMedicalBook ? "switch-on" : "switch-off"}`}
+                            onChange={(val) =>
+                                setFormData((prev) => ({ ...prev, hasMedicalBook: val }))
+                            }
+                            className={
+                                formData.hasMedicalBook ? "switch-on" : "switch-off"
+                            }
                         >
                             <span className="sr-only">Medical Book</span>
                             <span className="slider" />
@@ -140,7 +206,11 @@ const TabPersonalInfo = ({ teacher }) => {
                     </div>
                 </div>
 
-                <button type="button" className="save-button" onClick={handleSubmit}>
+                <button
+                    type="button"
+                    className="save-button"
+                    onClick={handleSubmit}
+                >
                     <FaSave /> Save
                 </button>
                 {saved && <p className="save-msg">Saved successfully ✅</p>}

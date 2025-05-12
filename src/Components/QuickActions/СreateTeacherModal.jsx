@@ -1,53 +1,60 @@
-// src/Components/CreateTeacherModal.jsx
 import React, { useState } from "react";
+import PropTypes from 'prop-types';
 import "./CreateTeacherModal.css";
 
-function CreateTeacherModal({ isOpen, onClose }) {
+// Helper для fetch с JWT
+function fetchWithToken(url, options = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+}
+
+function CreateTeacherModal({ isOpen, onClose, onSuccess }) {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
         email: "",
         password: ""
     });
-
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
     const handleChange = (e) => {
-        setFormData((prev) => ({
-            ...prev,
-            [e.target.name]: e.target.value
-        }));
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async () => {
-        const dto = {
-            user: {
-                ...formData
-            }
-        };
-
         if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
-            setMessage("❗ Fill in all fields");
+            setMessage("❗ Please fill in all fields");
             return;
         }
 
         setLoading(true);
         setMessage("");
 
+        const payload = { user: { ...formData } };
+
         try {
-            const response = await fetch("/api/v1/teachers", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(dto)
+            const res = await fetchWithToken('/api/v1/teachers', {
+                method: 'POST',
+                body: JSON.stringify(payload)
             });
-
-            if (!response.ok) throw new Error("Creation failed");
-
-            setMessage("✅ Teacher successfully created!");
+            if (!res.ok) throw new Error(`Error ${res.status}`);
+            const created = await res.json();
+            setMessage("✅ Teacher created successfully");
             setFormData({ firstName: "", lastName: "", email: "", password: "" });
+            // вызов callback после успешного создания
+            if (onSuccess) onSuccess(created);
         } catch (err) {
-            setMessage("❌ Error creating teacher");
+            console.error(err);
+            setMessage("❌ Failed to create teacher");
         } finally {
             setLoading(false);
         }
@@ -59,30 +66,70 @@ function CreateTeacherModal({ isOpen, onClose }) {
         <div className="modal-overlay">
             <div className="modal-content">
                 <h3>Create New Teacher</h3>
+                <div className="form-group">
+                    <label>First Name</label>
+                    <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Last Name</label>
+                    <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Email</label>
+                    <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                    />
+                </div>
+                <div className="form-group">
+                    <label>Password</label>
+                    <input
+                        type="password"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                    />
+                </div>
 
-                <label>First Name</label>
-                <input name="firstName" value={formData.firstName} onChange={handleChange} />
-
-                <label>Last Name</label>
-                <input name="lastName" value={formData.lastName} onChange={handleChange} />
-
-                <label>Email</label>
-                <input type="email" name="email" value={formData.email} onChange={handleChange} />
-
-                <label>Password</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} />
-
-                {message && <p className="modal-message">{message}</p>}
+                {message && <p className={`modal-message ${message.startsWith('✅') ? 'success' : 'error'}`}>{message}</p>}
 
                 <div className="modal-buttons">
-                    <button onClick={handleSubmit} disabled={loading}>
-                        {loading ? "Creating..." : "Create"}
+                    <button
+                        className="btn btn-primary"
+                        onClick={handleSubmit}
+                        disabled={loading}
+                    >
+                        {loading ? 'Creating...' : 'Create'}
                     </button>
-                    <button onClick={onClose} className="cancel-btn">Cancel</button>
+                    <button
+                        className="btn btn-secondary"
+                        onClick={onClose}
+                        disabled={loading}
+                    >
+                        Cancel
+                    </button>
                 </div>
             </div>
         </div>
     );
 }
+
+CreateTeacherModal.propTypes = {
+    isOpen: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onSuccess: PropTypes.func
+};
 
 export default CreateTeacherModal;

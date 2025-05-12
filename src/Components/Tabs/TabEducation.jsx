@@ -4,69 +4,99 @@ import "./TabAcademic.css";
 const TabEducation = ({ teacherId }) => {
     const [educations, setEducations] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editItem, setEditItem] = useState(null);
+    const [editEdu, setEditEdu] = useState(null);
 
-    const fetchEducations = () => {
-        fetch(`/api/v1/teachers/${teacherId}/educations`)
-            .then(res => res.json())
-            .then(setEducations)
-            .catch(console.error);
+    const fetchWithToken = (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            },
+        });
+    };
+
+    const fetchData = async () => {
+        if (!teacherId) return;
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/educations`
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            const data = await res.json();
+            setEducations(data);
+        } catch (err) {
+            console.error("Fetch educations error:", err);
+        }
     };
 
     useEffect(() => {
-        fetchEducations();
-    }, []);
+        fetchData();
+    }, [teacherId]);
 
-    const openModal = (item = null) => {
-        setEditItem(item || {
-            teacherId,
-            institutionName: "",
-            specialty: "",
-            diplomaQualification: "",
-            startYear: "",
-            endYear: "",
-            certificateNumber: "",
-        });
+    const openModal = (edu = null) => {
+        setEditEdu(
+            edu || {
+                teacherId,
+                institutionName: "",
+                specialty: "",
+                diplomaQualification: "",
+                startYear: "",
+                endYear: "",
+                certificateNumber: "",
+            }
+        );
         setShowModal(true);
     };
 
-    const handleSave = () => {
-        const method = editItem.educationId ? "PUT" : "POST";
-        const url = editItem.educationId
-            ? `/api/v1/teachers/${teacherId}/educations/${editItem.educationId}`
+    const saveEdu = async () => {
+        const method = editEdu.educationId ? "PUT" : "POST";
+        const url = editEdu.educationId
+            ? `/api/v1/teachers/${teacherId}/educations/${editEdu.educationId}`
             : `/api/v1/teachers/${teacherId}/educations`;
 
-        fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editItem),
-        })
-            .then(() => {
-                setShowModal(false);
-                fetchEducations();
+        try {
+            const res = await fetchWithToken(url, {
+                method,
+                body: JSON.stringify(editEdu),
             });
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            setShowModal(false);
+            fetchData();
+        } catch (err) {
+            console.error("Save education error:", err);
+        }
     };
 
-    const handleDelete = (educationId) => {
-        fetch(`/api/v1/teachers/${teacherId}/educations/${educationId}`, {
-            method: "DELETE"
-        }).then(fetchEducations);
+    const deleteEdu = async (id) => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/educations/${id}`,
+                { method: "DELETE" }
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            fetchData();
+        } catch (err) {
+            console.error("Delete education error:", err);
+        }
     };
 
     return (
-        <div className="education-tab">
+        <div className="academic-tab">
             <button className="add-button" onClick={() => openModal()}>+ Add Education</button>
 
-            <div className="education-list">
-                {educations.map((ed) => (
-                    <div key={ed.educationId} className="education-card">
+            <div className="academic-list">
+                {educations.map((edu) => (
+                    <div key={edu.educationId} className="academic-card">
                         <div>
-                            <strong>{ed.institutionName}</strong><br />
-                            {ed.specialty} ({ed.startYear}–{ed.endYear})
+                            <strong>{edu.institutionName}</strong><br />
+                            {edu.specialty} ({edu.startYear}–{edu.endYear})
                         </div>
-                        <div className="edu-actions">
-                            <button onClick={() => openModal(ed)}>✏️</button>
-                            <button onClick={() => handleDelete(ed.educationId)}>🗑️</button>
+                        <div className="actions">
+                            <button onClick={() => openModal(edu)}>✏️</button>
+                            <button onClick={() => deleteEdu(edu.educationId)}>🗑️</button>
                         </div>
                     </div>
                 ))}
@@ -75,44 +105,76 @@ const TabEducation = ({ teacherId }) => {
             {showModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
-                        <h3>{editItem.educationId ? "Edit Education" : "Add Education"}</h3>
+                        <h3>{editEdu.educationId ? "Edit Education" : "Add Education"}</h3>
 
-                        <input
-                            placeholder="Institution Name"
-                            value={editItem.institutionName}
-                            onChange={(e) => setEditItem({ ...editItem, institutionName: e.target.value })}
-                        />
-                        <input
-                            placeholder="Specialty"
-                            value={editItem.specialty}
-                            onChange={(e) => setEditItem({ ...editItem, specialty: e.target.value })}
-                        />
-                        <input
-                            placeholder="Qualification"
-                            value={editItem.diplomaQualification}
-                            onChange={(e) => setEditItem({ ...editItem, diplomaQualification: e.target.value })}
-                        />
-                        <input
-                            placeholder="Start Year"
-                            type="number"
-                            value={editItem.startYear}
-                            onChange={(e) => setEditItem({ ...editItem, startYear: parseInt(e.target.value) })}
-                        />
-                        <input
-                            placeholder="End Year"
-                            type="number"
-                            value={editItem.endYear}
-                            onChange={(e) => setEditItem({ ...editItem, endYear: parseInt(e.target.value) })}
-                        />
-                        <input
-                            placeholder="Certificate Number"
-                            value={editItem.certificateNumber}
-                            onChange={(e) => setEditItem({ ...editItem, certificateNumber: e.target.value })}
-                        />
+                        <div className="form-group">
+                            <label htmlFor="institutionName">Institution Name</label>
+                            <input
+                                id="institutionName"
+                                placeholder="Institution Name"
+                                value={editEdu.institutionName}
+                                onChange={(e) => setEditEdu({ ...editEdu, institutionName: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="specialty">Specialty</label>
+                            <input
+                                id="specialty"
+                                placeholder="Specialty"
+                                value={editEdu.specialty}
+                                onChange={(e) => setEditEdu({ ...editEdu, specialty: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="qualification">Qualification</label>
+                            <input
+                                id="qualification"
+                                placeholder="Qualification"
+                                value={editEdu.diplomaQualification}
+                                onChange={(e) =>
+                                    setEditEdu({ ...editEdu, diplomaQualification: e.target.value })
+                                }
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="startYear">Start Year</label>
+                            <input
+                                id="startYear"
+                                type="number"
+                                placeholder="Start Year"
+                                value={editEdu.startYear}
+                                onChange={(e) =>
+                                    setEditEdu({ ...editEdu, startYear: parseInt(e.target.value, 10) || "" })
+                                }
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="endYear">End Year</label>
+                            <input
+                                id="endYear"
+                                type="number"
+                                placeholder="End Year"
+                                value={editEdu.endYear}
+                                onChange={(e) =>
+                                    setEditEdu({ ...editEdu, endYear: parseInt(e.target.value, 10) || "" })
+                                }
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="certificateNumber">Certificate Number</label>
+                            <input
+                                id="certificateNumber"
+                                placeholder="Certificate Number"
+                                value={editEdu.certificateNumber}
+                                onChange={(e) =>
+                                    setEditEdu({ ...editEdu, certificateNumber: e.target.value })
+                                }
+                            />
+                        </div>
 
                         <div className="modal-actions">
-                            <button onClick={handleSave}>💾 Save</button>
-                            <button onClick={() => setShowModal(false)}>❌ Cancel</button>
+                            <button onClick={saveEdu}>Save</button>
+                            <button onClick={() => setShowModal(false)}>Cancel</button>
                         </div>
                     </div>
                 </div>

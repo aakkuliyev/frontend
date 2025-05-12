@@ -122,6 +122,40 @@
     to { opacity: 1; transform: scale(1); }
 }
 
+/* TabAcademic.css */
+.academic-tab.two-columns {
+    display: flex;
+    gap: 1rem;
+}
+.column {
+    flex: 1;
+    background: #f9f9f9;
+    padding: 1rem;
+    border-radius: 4px;
+    min-height: 200px;
+}
+.academic-card {
+    background: #fff;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: grab;
+}
+.academic-card:active {
+    cursor: grabbing;
+}
+
+.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.checkbox-label {
+    margin: 0;
+}
+
+
 /* Responsive tweak */
 @media (max-width: 600px) {
     .modal-content {

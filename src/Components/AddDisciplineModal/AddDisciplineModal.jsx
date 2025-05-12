@@ -1,36 +1,46 @@
-// src/Components/AddDisciplineModal.jsx
-import React, { useState } from "react";
-import "./AddDisciplineModal.css";
+// src/Components/AddDisciplineModal/AddDisciplineModal.jsx
+import React, { useState } from 'react';
+import './AddDisciplineModal.css';
+
+// простой fetch-helper, без хуков
+function fetchWithToken(url, options = {}) {
+    const token = localStorage.getItem('token');
+    return fetch(url, {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {}),
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+}
 
 function AddDisciplineModal({ isOpen, onClose, onSuccess }) {
-    const [disciplineName, setDisciplineName] = useState("");
-    const [message, setMessage] = useState("");
+    const [name, setName]       = useState('');
+    const [msg, setMsg]         = useState('');
     const [loading, setLoading] = useState(false);
 
     const handleCreate = async () => {
-        if (!disciplineName.trim()) {
-            setMessage("Discipline name is required.");
+        if (!name.trim()) {
+            setMsg('Name required');
             return;
         }
-
         setLoading(true);
-        setMessage("");
-
+        setMsg('');
         try {
-            const response = await fetch("/api/v1/disciplines", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ disciplineName })
+            const res = await fetchWithToken('/api/v1/disciplines', {
+                method: 'POST',
+                body: JSON.stringify({ disciplineName: name.trim() }),
             });
-
-            if (!response.ok) throw new Error("Failed to create");
-
-            const result = await response.json();
-            onSuccess?.(result); // опциональный коллбек при успехе
-            setDisciplineName("");
-            onClose();
-        } catch (err) {
-            setMessage("Error creating discipline.");
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || `Error ${res.status}`);
+            }
+            const dto = await res.json();
+            onSuccess && onSuccess(dto);
+            setName('');
+        } catch (e) {
+            setMsg(e.message || 'Error creating discipline');
         } finally {
             setLoading(false);
         }
@@ -41,22 +51,19 @@ function AddDisciplineModal({ isOpen, onClose, onSuccess }) {
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <h3>Add New Discipline</h3>
-
-                <label>Discipline Name</label>
+                <h3>Add Discipline</h3>
                 <input
-                    type="text"
-                    value={disciplineName}
-                    onChange={(e) => setDisciplineName(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Software Engineering"
                 />
-
-                {message && <p className="modal-message">{message}</p>}
-
+                {msg && <p className="modal-message">{msg}</p>}
                 <div className="modal-buttons">
-                    <button onClick={onClose} className="cancel-btn">Cancel</button>
+                    <button onClick={onClose} className="cancel-btn">
+                        Cancel
+                    </button>
                     <button onClick={handleCreate} disabled={loading}>
-                        {loading ? "Adding..." : "Add"}
+                        {loading ? 'Adding…' : 'Add'}
                     </button>
                 </div>
             </div>

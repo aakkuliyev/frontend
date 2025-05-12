@@ -1,0 +1,99 @@
+/* ReportPage.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+.report-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    background-color: #F9FAFB; /* светлый фон */
+    padding: 20px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.report-card {
+    background: #FFFFFF;
+    padding: 48px 32px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+.report-card h1 {
+    margin-bottom: 12px;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #111827; /* Gray-900 */
+}
+
+.report-description {
+    margin-bottom: 32px;
+    color: #4B5563; /* Gray-600 */
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.report-options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 600px) {
+    .report-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.report-option {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB; /* Gray-200 */
+    border-radius: 10px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.report-icon {
+    color: #2563EB; /* Blue-600 */
+    margin-bottom: 16px;
+}
+
+.report-option h2 {
+    margin: 8px 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #1F2937; /* Gray-800 */
+}
+
+.report-option p {
+    margin-bottom: 20px;
+    color: #6B7280; /* Gray-500 */
+    font-size: 0.95rem;
+    font-weight: 400;
+}
+
+.report-button {
+    padding: 0.75rem 1.75rem;
+    background-color: #2563EB; /* Blue-600 */
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.report-button:hover:not(:disabled) {
+    background-color: #1E40AF; /* Blue-800 */
+}
+
+.report-button:disabled {
+    background-color: #93C5FD; /* Blue-300 */
+    cursor: not-allowed;
+}

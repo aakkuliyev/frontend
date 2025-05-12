@@ -1,116 +1,182 @@
+/* TeachersPage.css */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
 .teachers-container {
     padding: 24px;
-    font-family: 'Segoe UI', sans-serif;
+    background-color: #F9FAFB;
+    min-height: calc(100vh - 64px);
+    font-family: 'Roboto', sans-serif;
+}
+
+.teachers-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.teachers-header h2 {
+    margin: 0;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.invite-button {
+    padding: 0.5rem 1.25rem;
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.invite-button:hover:not(:disabled) {
+    background-color: #1E40AF;
 }
 
 .filters {
     display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
 }
 
 .filters input,
 .filters select {
-    padding: 8px;
+    flex: 1;
+    min-width: 180px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB;
     border-radius: 6px;
-    border: 1px solid #ccc;
+    font-size: 0.95rem;
+    color: #374151;
+    background-color: #FFFFFF;
+    transition: border-color 0.2s;
+}
+
+.filters input:focus,
+.filters select:focus {
+    outline: none;
+    border-color: #2563EB;
 }
 
 .cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
 }
 
 .teacher-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    width: 320px;
-    padding: 16px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    background-color: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.2s;
+}
+
+.teacher-card:hover {
+    transform: translateY(-4px);
 }
 
 .teacher-header {
     display: flex;
-    gap: 12px;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .avatar {
-    background: #f3f3f3;
+    width: 48px;
+    height: 48px;
+    background-color: #E0E7FF;
+    color: #4338CA;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .name {
+    font-size: 1rem;
     font-weight: 600;
+    color: #111827;
 }
 
 .email {
-    font-size: 12px;
-    color: gray;
+    font-size: 0.875rem;
+    color: #6B7280;
 }
 
 .info {
-    font-size: 14px;
-    margin: 10px 0;
+    flex: 1;
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 16px;
+    line-height: 1.4;
 }
 
-.status {
-    padding: 2px 6px;
-    border-radius: 6px;
-    font-size: 12px;
-}
-
-.status.active {
-    background-color: #dcfce7;
-    color: #22c55e;
-}
-
-.status.inactive {
-    background-color: #fee2e2;
-    color: #ef4444;
+.info strong {
+    color: #111827;
 }
 
 .actions {
     display: flex;
-    justify-content: end;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 12px;
 }
 
 .actions button {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    color: #6B7280;
+    transition: color 0.2s;
+}
+
+.actions button:hover {
+    color: #2563EB;
 }
 
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
-    gap: 6px;
+    align-items: center;
+    gap: 8px;
+    margin-top: 32px;
 }
 
 .pagination button {
-    padding: 6px 12px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB;
     border-radius: 6px;
-    border: 1px solid #ddd;
+    background-color: #FFFFFF;
+    color: #374151;
+    font-size: 0.875rem;
     cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-.pagination button.active {
-    background-color: #2563eb;
-    color: white;
-    border-color: #2563eb;
+.pagination button:hover:not(:disabled) {
+    background-color: #F3F4F6;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination .active {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border-color: #2563EB;
 }

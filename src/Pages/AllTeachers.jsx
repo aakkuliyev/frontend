@@ -1,165 +1,133 @@
-import React, { useEffect, useState } from "react";
-import "./CSS/TeachersPage.css";
+import React, { useEffect, useState, useCallback } from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CreateTeacherModal from "../Components/QuickActions/СreateTeacherModal";
+import "./CSS/TeachersPage.css";
 
-
-
-const allTeachers = [
-    {
-        teacherId: 1,
-        user: {
-            userId: 101,
-            firstName: "Aibek",
-            lastName: "Shynazbek",
-            email: "aibek@iitu.kz"
-        },
-        dateOfBirth: "1999-01-01",
-        placeOfBirth: "Almaty",
-        criminalRecord: "None",
-        hasMedicalBook: true,
-        militaryRank: "Lieutenant",
-        otherTitles: "Senior Lecturer",
-        createdAt: "2024-01-10T10:00:00Z",
-        updatedAt: "2024-03-12T12:00:00Z"
-    },
-    {
-        teacherId: 2,
-        user: {
-            userId: 102,
-            firstName: "Aruzhan",
-            lastName: "Talgatova",
-            email: "aruzhan@kaznu.kz"
-        },
-        dateOfBirth: "1992-05-14",
-        placeOfBirth: "Shymkent",
-        criminalRecord: "None",
-        hasMedicalBook: false,
-        militaryRank: "Captain",
-        otherTitles: "Department Assistant",
-        createdAt: "2023-09-01T09:30:00Z",
-        updatedAt: "2024-03-15T11:20:00Z"
-    },
-    {
-        teacherId: 3,
-        user: {
-            userId: 103,
-            firstName: "Daniyar",
-            lastName: "Rakhimov",
-            email: "daniyar@satbayev.kz"
-        },
-        dateOfBirth: "1987-12-02",
-        placeOfBirth: "Astana",
-        criminalRecord: "No records",
-        hasMedicalBook: true,
-        militaryRank: "Major",
-        otherTitles: "Head of Research",
-        createdAt: "2022-07-20T08:15:00Z",
-        updatedAt: "2024-01-05T10:45:00Z"
-    },
-    {
-        teacherId: 4,
-        user: {
-            userId: 104,
-            firstName: "Madina",
-            lastName: "Nurmanova",
-            email: "madina@kbtu.kz"
-        },
-        dateOfBirth: "1995-09-10",
-        placeOfBirth: "Pavlodar",
-        criminalRecord: "None",
-        hasMedicalBook: true,
-        militaryRank: "None",
-        otherTitles: "",
-        createdAt: "2024-02-11T11:00:00Z",
-        updatedAt: "2024-03-01T14:22:00Z"
-    },
-    {
-        teacherId: 5,
-        user: {
-            userId: 105,
-            firstName: "Erzhan",
-            lastName: "Tuleubekov",
-            email: "erzhan@narxoz.kz"
-        },
-        dateOfBirth: "1985-11-03",
-        placeOfBirth: "Aktobe",
-        criminalRecord: "None",
-        hasMedicalBook: false,
-        militaryRank: "Sergeant",
-        otherTitles: "Lecturer",
-        createdAt: "2023-03-18T07:30:00Z",
-        updatedAt: "2024-02-20T09:10:00Z"
-    }
-];
-
+const formatDate = (isoString) => {
+    if (!isoString) return "";
+    const date = new Date(isoString);
+    return date.toLocaleDateString("ru-RU", {
+        day:   "2-digit",
+        month: "2-digit",
+        year:  "numeric",
+    });
+};
 
 const AllTeachers = () => {
-    const [search, setSearch] = useState("");
+    const [search, setSearch]             = useState("");
     const [organization, setOrganization] = useState("");
-    const [degree, setDegree] = useState("");
-    const [page, setPage] = useState(1);
-    const size = 20;
+    const [degree, setDegree]             = useState("");
+    const [page, setPage]                 = useState(1);
+    const size                            = 20;
 
-    const [filtered, setFiltered] = useState([]);
+    const [teachers, setTeachers]               = useState([]);
+    const [organizations, setOrganizations]     = useState([]);
+    const [degrees, setDegrees]                 = useState([]);
+    const [totalPages, setTotalPages]           = useState(1);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
     const navigate = useNavigate();
 
+    // Helper fetch with token
+    const fetchWithToken = useCallback((url) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    }, []);
+
+    // Reset page when filters change
+    useEffect(() => { setPage(1); }, [search, organization, degree]);
+
+    // Load teachers
+    const loadTeachers = useCallback(async () => {
+        try {
+            const params = new URLSearchParams({
+                search,
+                organization,
+                degree,
+                page: page - 1,
+                size
+            }).toString();
+
+            const res = await fetchWithToken(`/api/v1/teachers?${params}`);
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Status ${res.status}: ${errText}`);
+            }
+
+            const data = await res.json();
+            const list = Array.isArray(data) ? data : data.content;
+            setTeachers(list);
+            setTotalPages(data.totalPages ?? 1);
+        } catch (err) {
+            console.error("Error loading teachers:", err);
+        }
+    }, [search, organization, degree, page, fetchWithToken]);
+
+    useEffect(() => { loadTeachers(); }, [loadTeachers]);
+
+    // Load filter options
     useEffect(() => {
-        let result = [...allTeachers];
+        const loadFilters = async () => {
+            try {
+                const [orgsRes, degsRes] = await Promise.all([
+                    fetchWithToken("/api/v1/organizations"),
+                    fetchWithToken("/api/v1/degrees/types")
+                ]);
+                if (orgsRes.ok) setOrganizations(await orgsRes.json());
+                if (degsRes.ok) setDegrees(await degsRes.json());
+            } catch (err) {
+                console.error("Error loading filters:", err);
+            }
+        };
+        loadFilters();
+    }, [fetchWithToken]);
 
-        // Поиск по имени
-        result = result.filter((t) => {
-            const firstName = t?.user?.firstName || "";
-            const lastName = t?.user?.lastName || "";
-            const fullName = `${firstName} ${lastName}`.toLowerCase();
-            return fullName.includes(search.toLowerCase());
-        });
-
-        // Фильтр по организации
-        if (organization) {
-            result = result.filter((t) => (t.organization || "").toLowerCase() === organization.toLowerCase());
-        }
-
-        // Фильтр по академической степени
-        if (degree) {
-            result = result.filter((t) => (t.academicDegree || "").toLowerCase() === degree.toLowerCase());
-        }
-
-        setFiltered(result);
+    const handleCreateSuccess = () => {
+        setShowCreateModal(false);
         setPage(1);
-    }, [search, organization, degree]);
-
-
-    const paginated = filtered.slice((page - 1) * size, page * size);
-    const totalPages = Math.ceil(filtered.length / size);
+    };
 
     return (
         <div className="teachers-container">
+            <div className="teachers-header">
+                <h2>All Teachers</h2>
+                <button
+                    className="invite-button"
+                    onClick={() => setShowCreateModal(true)}
+                >
+                    Invite New Teacher
+                </button>
+            </div>
+
             <div className="filters">
                 <input
                     placeholder="Search teachers..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                 />
-                <select value={organization} onChange={(e) => setOrganization(e.target.value)}>
+                <select
+                    value={organization}
+                    onChange={(e) => setOrganization(e.target.value)}
+                >
                     <option value="">All Organizations</option>
-                    <option value="IITU">IITU</option>
-                    <option value="KazNU">KazNU</option>
-                    <option value="Satbayev">Satbayev</option>
-                    <option value="KBTU">KBTU</option>
-                    <option value="Narxoz">Narxoz</option>
+                    {organizations.map((org, idx) => (
+                        <option key={idx} value={org}>{org}</option>
+                    ))}
                 </select>
-                <select value={degree} onChange={(e) => setDegree(e.target.value)}>
+                <select
+                    value={degree}
+                    onChange={(e) => setDegree(e.target.value)}
+                >
                     <option value="">All Academic Degrees</option>
-                    <option value="PhD">PhD</option>
-                    <option value="Master">Master</option>
-                    <option value="Bachelor">Bachelor</option>
+                    {degrees.map((deg, idx) => (
+                        <option key={idx} value={deg}>{deg}</option>
+                    ))}
                 </select>
             </div>
 
             <div className="cards">
-                {paginated.map((t) => (
+                {teachers.map((t) => (
                     <div key={t.teacherId} className="teacher-card">
                         <div className="teacher-header">
                             <div className="avatar">{t.user.firstName[0]}</div>
@@ -169,17 +137,15 @@ const AllTeachers = () => {
                             </div>
                         </div>
                         <div className="info">
-                            <div><strong>Date of Birth:</strong> {t.dateOfBirth}</div>
+                            <div><strong>Date of Birth:</strong> {formatDate(t.dateOfBirth)}</div>
                             <div><strong>Place of Birth:</strong> {t.placeOfBirth}</div>
                             <div><strong>Criminal Record:</strong> {t.criminalRecord}</div>
                             <div><strong>Military Rank:</strong> {t.militaryRank}</div>
                             <div><strong>Other Titles:</strong> {t.otherTitles}</div>
                         </div>
                         <div className="actions">
-                            <button title="View" onClick={() => navigate("/admin/teachers/mock")}>
-                                <Eye size={18} />
-                            </button>
-                            <button title="Edit"><Pencil size={18} /></button>
+                            <button title="View" onClick={() => navigate(`/admin/teachers/${t.teacherId}`)}><Eye size={18} /></button>
+                            <button title="Edit" onClick={() => navigate(`/admin/teachers/${t.teacherId}`)}><Pencil size={18} /></button>
                             <button title="Delete"><Trash2 size={18} /></button>
                         </div>
                     </div>
@@ -187,22 +153,30 @@ const AllTeachers = () => {
             </div>
 
             <div className="pagination">
-                <button onClick={() => setPage((p) => Math.max(p - 1, 1))} disabled={page === 1}>
-                    Previous
-                </button>
+                <button
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                    disabled={page === 1}
+                >Previous</button>
                 {[...Array(totalPages)].map((_, i) => (
                     <button
                         key={i}
                         className={page === i + 1 ? "active" : ""}
                         onClick={() => setPage(i + 1)}
-                    >
-                        {i + 1}
-                    </button>
+                    >{i + 1}</button>
                 ))}
-                <button onClick={() => setPage((p) => Math.min(p + 1, totalPages))} disabled={page === totalPages}>
-                    Next
-                </button>
+                <button
+                    onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={page === totalPages}
+                >Next</button>
             </div>
+
+            {showCreateModal && (
+                <CreateTeacherModal
+                    isOpen={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={handleCreateSuccess}
+                />
+            )}
         </div>
     );
 };

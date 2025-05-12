@@ -2,81 +2,95 @@ import React, { useEffect, useState } from "react";
 import "./TabAcademic.css";
 
 const TabInclusiveEducation = ({ teacherId }) => {
-    const [list, setList] = useState([]);
+    const [docs, setDocs] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editItem, setEditItem] = useState(null);
+    const [editDoc, setEditDoc] = useState(null);
 
-    const fetchData = () => {
-        fetch(`/api/v1/teachers/${teacherId}/inclusive-educations`)
-            .then(res => res.json())
-            .then(setList);
+    const fetchWithToken = (url, options = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+                ...(options.headers || {}),
+            },
+        });
     };
 
-    /*useEffect(() => {
-        fetchData();
-    }, []);*/
+    const fetchData = async () => {
+        if (!teacherId) return;
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/inclusive-educations`
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            const data = await res.json();
+            setDocs(data);
+        } catch (err) {
+            console.error("Fetch inclusive data error:", err);
+        }
+    };
+
     useEffect(() => {
-        const mockList = [
-            {
-                inclusiveEducationId: 1,
+        fetchData();
+    }, [teacherId]);
+
+    const openModal = (doc = null) => {
+        setEditDoc(
+            doc || {
                 teacherId,
-                courses: "Inclusive Teaching Methods, Special Ed 101",
-                internships: "Interned at Inclusive Center for Youth, Helsinki"
-            },
-            {
-                inclusiveEducationId: 2,
-                teacherId,
-                courses: "Psychological Adaptation in Learning",
-                internships: "Summer School for Neurodivergent Students"
+                courses: "",
+                internships: "",
             }
-        ];
-        setList(mockList);
-    }, []);
-
-
-    const openModal = (item = null) => {
-        setEditItem(item || {
-            teacherId,
-            courses: "",
-            internships: "",
-        });
+        );
         setShowModal(true);
     };
 
-    const save = () => {
-        const method = editItem.inclusiveEducationId ? "PUT" : "POST";
-        const url = editItem.inclusiveEducationId
-            ? `/api/v1/teachers/${teacherId}/inclusive-educations/${editItem.inclusiveEducationId}`
+    const saveDoc = async () => {
+        const method = editDoc.inclusiveEducationId ? "PUT" : "POST";
+        const url = editDoc.inclusiveEducationId
+            ? `/api/v1/teachers/${teacherId}/inclusive-educations/${editDoc.inclusiveEducationId}`
             : `/api/v1/teachers/${teacherId}/inclusive-educations`;
-
-        fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editItem)
-        }).then(() => {
+        try {
+            const res = await fetchWithToken(url, {
+                method,
+                body: JSON.stringify(editDoc),
+            });
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
             setShowModal(false);
             fetchData();
-        });
+        } catch (err) {
+            console.error("Save inclusive data error:", err);
+        }
     };
 
-    const remove = (id) => {
-        fetch(`/api/v1/teachers/${teacherId}/inclusive-educations/${id}`, { method: "DELETE" }).then(fetchData);
+    const deleteDoc = async (id) => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/inclusive-educations/${id}`,
+                { method: "DELETE" }
+            );
+            if (!res.ok) throw new Error(`Error: ${res.status}`);
+            fetchData();
+        } catch (err) {
+            console.error("Delete inclusive data error:", err);
+        }
     };
 
     return (
         <div className="academic-tab">
             <button className="add-button" onClick={() => openModal()}>+ Add Inclusive Info</button>
-
             <div className="academic-list">
-                {list.map((item) => (
-                    <div key={item.inclusiveEducationId} className="academic-card">
+                {docs.map((doc) => (
+                    <div key={doc.inclusiveEducationId} className="academic-card">
                         <div>
-                            <strong>Courses:</strong> {item.courses}<br />
-                            <strong>Internships:</strong> {item.internships}
+                            <strong>Courses:</strong> {doc.courses}<br />
+                            <strong>Internships:</strong> {doc.internships}
                         </div>
                         <div className="actions">
-                            <button onClick={() => openModal(item)}>✏️</button>
-                            <button onClick={() => remove(item.inclusiveEducationId)}>🗑️</button>
+                            <button onClick={() => openModal(doc)}>✏️</button>
+                            <button onClick={() => deleteDoc(doc.inclusiveEducationId)}>🗑️</button>
                         </div>
                     </div>
                 ))}
@@ -85,19 +99,28 @@ const TabInclusiveEducation = ({ teacherId }) => {
             {showModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
-                        <h3>{editItem.inclusiveEducationId ? "Edit" : "Add"} Inclusive Info</h3>
-                        <textarea
-                            placeholder="Courses"
-                            value={editItem.courses}
-                            onChange={(e) => setEditItem({ ...editItem, courses: e.target.value })}
-                        />
-                        <textarea
-                            placeholder="Internships"
-                            value={editItem.internships}
-                            onChange={(e) => setEditItem({ ...editItem, internships: e.target.value })}
-                        />
+                        <h3>{editDoc.inclusiveEducationId ? "Edit Inclusive Info" : "Add Inclusive Info"}</h3>
+
+                        <div className="form-group">
+                            <label htmlFor="courses">Courses</label>
+                            <textarea
+                                id="courses"
+                                placeholder="Courses"
+                                value={editDoc.courses}
+                                onChange={(e) => setEditDoc({ ...editDoc, courses: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="internships">Internships</label>
+                            <textarea
+                                id="internships"
+                                placeholder="Internships"
+                                value={editDoc.internships}
+                                onChange={(e) => setEditDoc({ ...editDoc, internships: e.target.value })}
+                            />
+                        </div>
                         <div className="modal-actions">
-                            <button onClick={save}>Save</button>
+                            <button onClick={saveDoc}>Save</button>
                             <button onClick={() => setShowModal(false)}>Cancel</button>
                         </div>
                     </div>

@@ -1,45 +1,78 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import AuthPage from "./Pages/AuthPage";
-import Footer from "./Components/Footer/Footer";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+
 import Navbar from "./Components/Navbar/Navbar";
+import Footer from "./Components/Footer/Footer";
+import AuthPage from "./Pages/AuthPage";
 import AdminLayout from "./Pages/AdminLayout";
 import AdminDashboard from "./Pages/AdminDashboard";
 import AllTeachers from "./Pages/AllTeachers";
+import TeacherProfilePage from "./Pages/TeacherProfile";
 import DisciplinesPage from "./Pages/DisciplinesPage";
 import LogoutPage from "./Pages/LogoutPage";
-import TeacherProfilePage from "./Pages/TeacherProfile";
-import MockPage from "./Pages/MockPage";
 import TeacherDashboard from "./Pages/TeacherDashboard";
-import MyDisciplines from "./Pages/MyDisciplines";
 import MockDisciplines from "./Pages/MockDisciplines";
+import ReportPage from "./Pages/ReportPage";
+
+// Проверяет наличие токена
+const RequireAuth = () => {
+    const token = localStorage.getItem("token");
+    return token ? <Outlet /> : <Navigate to="/" replace />;
+};
+
+// Проверяет роль пользователя внутри токена
+const RequireRole = ({ allowedRoles }) => {
+    const token = localStorage.getItem("token");
+    if (!token) return <Navigate to="/" replace />;
+
+    let role;
+    try {
+        const decoded = jwtDecode(token);
+        role = decoded.role;
+    } catch {
+        return <Navigate to="/" replace />;
+    }
+
+    return allowedRoles.includes(role) ? <Outlet /> : <Navigate to="/" replace />;
+};
 
 function App() {
     return (
         <BrowserRouter>
             <Navbar />
             <Routes>
-                {/* Главная страница */}
+                {/* Public route */}
                 <Route path="/" element={<AuthPage />} />
 
-                {/* Админский блок */}
-                <Route path="/admin" element={<AdminLayout />}>
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="teachers" element={<AllTeachers />} />
-                    <Route path="teachers/:id" element={<TeacherProfilePage />} />
-                    <Route path="teachers/mock" element={<MockPage />} />
-                    <Route path="disciplines" element={<DisciplinesPage />} />
-                    <Route path="logout" element={<LogoutPage />} />
+                {/* Protected admin routes */}
+                <Route element={<RequireAuth /> }>
+                    <Route element={<RequireRole allowedRoles={["ADMIN"]} /> }>
+                        <Route path="/admin" element={<AdminLayout />}>
+                            <Route index element={<Navigate to="dashboard" replace />} />
+                            <Route path="dashboard" element={<AdminDashboard />} />
+                            <Route path="teachers" element={<AllTeachers />} />
+                            <Route path="teachers/:id" element={<TeacherProfilePage />} />
+                            <Route path="disciplines" element={<DisciplinesPage />} />
+                            <Route path="reports" element={<ReportPage />} />
+                            <Route path="logout" element={<LogoutPage />} />
+                        </Route>
+                    </Route>
                 </Route>
 
-                {/* Teacher блок */}
-                <Route path="/teacher">
-                    <Route index element={<TeacherDashboard />} />
-                    <Route path="disciplines" element={<MockDisciplines />} />
+                {/* Protected teacher routes */}
+                <Route element={<RequireAuth /> }>
+                    <Route element={<RequireRole allowedRoles={["TEACHER"]} /> }>
+                        <Route path="/teacher">
+                            <Route index element={<TeacherDashboard />} />
+                            <Route path="disciplines" element={<MockDisciplines />} />
+                            <Route path="logout" element={<LogoutPage />} />
+                        </Route>
+                    </Route>
                 </Route>
 
-                {/* 404 */}
-                <Route path="*" element={<div>404 Not Found</div>} />
+                {/* Catch-all */}
+                <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             <Footer />
         </BrowserRouter>

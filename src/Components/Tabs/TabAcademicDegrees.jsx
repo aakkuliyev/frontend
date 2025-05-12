@@ -1,46 +1,45 @@
+// src/Components/Tabs/TabAcademicDegrees.jsx
 import React, { useEffect, useState } from "react";
 import "./TabAcademic.css";
 
 const TabAcademicDegrees = ({ teacherId }) => {
-    const [list, setList] = useState([]);
+    const [list, setList]         = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [editItem, setEditItem] = useState(null);
+    const [editItem, setEditItem]   = useState(null);
 
-    const fetchData = () => {
-        fetch(`/api/v1/teachers/${teacherId}/degrees`)
-            .then(res => res.json())
-            .then(setList);
+    // Утилита для fetch с токеном
+    const fetchWithToken = (url, opts = {}) => {
+        const token = localStorage.getItem("token");
+        return fetch(url, {
+            ...opts,
+            headers: {
+                ...(opts.headers || {}),
+                Authorization: `Bearer ${token}`,
+            },
+        });
     };
 
-  /*  useEffect(() => {
-        fetchData();
-    }, []);*/
+    // Загрузить список степеней
+    const fetchData = async () => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/academicDegrees`
+            );
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            const data = await res.json();
+            setList(data);
+        } catch (err) {
+            console.error("Error fetching academic degrees:", err);
+        }
+    };
 
     useEffect(() => {
-        const mockDegrees = [
-            {
-                academicDegreeId: 1,
-                teacherId,
-                degreeType: "PhD",
-                specialty: "Computer Science",
-                yearAwarded: 2020
-            },
-            {
-                academicDegreeId: 2,
-                teacherId,
-                degreeType: "Master",
-                specialty: "Artificial Intelligence",
-                yearAwarded: 2017
-            }
-        ];
-        setList(mockDegrees);
-    }, []);
-
+        if (teacherId) fetchData();
+    }, [teacherId]);
 
     const openModal = (item = null) => {
         setEditItem(
-            item || {
-                teacherId,
+            item ?? {
                 degreeType: "",
                 specialty: "",
                 yearAwarded: new Date().getFullYear(),
@@ -49,29 +48,44 @@ const TabAcademicDegrees = ({ teacherId }) => {
         setShowModal(true);
     };
 
-    const save = () => {
-        const method = editItem.academicDegreeId ? "PUT" : "POST";
-        const url = editItem.academicDegreeId
-            ? `/api/v1/teachers/${teacherId}/degrees/${editItem.academicDegreeId}`
-            : `/api/v1/teachers/${teacherId}/degrees`;
+    const save = async () => {
+        try {
+            const method = editItem.academicDegreeId ? "PUT" : "POST";
+            const url    = editItem.academicDegreeId
+                ? `/api/v1/teachers/${teacherId}/academicDegrees/${editItem.academicDegreeId}`
+                : `/api/v1/teachers/${teacherId}/academicDegrees`;
 
-        fetch(url, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(editItem)
-        }).then(() => {
+            const res = await fetchWithToken(url, {
+                method,
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editItem),
+            });
+            if (!res.ok) throw new Error(`Status ${res.status}`);
             setShowModal(false);
             fetchData();
-        });
+        } catch (err) {
+            console.error("Error saving academic degree:", err);
+        }
     };
 
-    const remove = (id) => {
-        fetch(`/api/v1/teachers/${teacherId}/degrees/${id}`, { method: "DELETE" }).then(fetchData);
+    const remove = async (id) => {
+        try {
+            const res = await fetchWithToken(
+                `/api/v1/teachers/${teacherId}/academicDegrees/${id}`,
+                { method: "DELETE" }
+            );
+            if (!res.ok) throw new Error(`Status ${res.status}`);
+            fetchData();
+        } catch (err) {
+            console.error("Error deleting academic degree:", err);
+        }
     };
 
     return (
         <div className="academic-tab">
-            <button className="add-button" onClick={() => openModal()}>+ Add Degree</button>
+            <button className="add-button" onClick={() => openModal()}>
+                + Add Degree
+            </button>
 
             <div className="academic-list">
                 {list.map((d) => (
@@ -90,23 +104,33 @@ const TabAcademicDegrees = ({ teacherId }) => {
             {showModal && (
                 <div className="modal-backdrop">
                     <div className="modal-content">
-                        <h3>{editItem.academicDegreeId ? "Edit Degree" : "Add Degree"}</h3>
-
+                        <h3>
+                            {editItem.academicDegreeId ? "Edit Degree" : "Add Degree"}
+                        </h3>
                         <input
                             placeholder="Degree Type"
                             value={editItem.degreeType}
-                            onChange={(e) => setEditItem({ ...editItem, degreeType: e.target.value })}
+                            onChange={(e) =>
+                                setEditItem({ ...editItem, degreeType: e.target.value })
+                            }
                         />
                         <input
                             placeholder="Specialty"
                             value={editItem.specialty}
-                            onChange={(e) => setEditItem({ ...editItem, specialty: e.target.value })}
+                            onChange={(e) =>
+                                setEditItem({ ...editItem, specialty: e.target.value })
+                            }
                         />
                         <input
                             placeholder="Year"
                             type="number"
                             value={editItem.yearAwarded}
-                            onChange={(e) => setEditItem({ ...editItem, yearAwarded: parseInt(e.target.value) })}
+                            onChange={(e) =>
+                                setEditItem({
+                                    ...editItem,
+                                    yearAwarded: parseInt(e.target.value, 10) || "",
+                                })
+                            }
                         />
 
                         <div className="modal-actions">
